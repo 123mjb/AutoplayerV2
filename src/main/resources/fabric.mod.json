@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "autoplayer",
+	"version": "${version}",
+	"name": "Autoplayer",
+	"description": "Project people will definitely question why you need to have.",
+	"authors": [
+		"Chiefminingdad"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/autoplayer",
+		"sources": "https://github.com/123mjb/AutoplayerV2"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/autoplayer/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.chiefminingdad.autoplayer.AutoPlayer"
+		],
+		"client": [
+			"com.chiefminingdad.autoplayer.AutoPlayerClient"
+		]
+	},
+	"mixins": [
+		"autoplayer.mixins.json",
+		{
+			"config": "autoplayer.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
