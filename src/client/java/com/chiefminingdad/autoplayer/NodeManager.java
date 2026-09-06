@@ -25,6 +25,7 @@ public class NodeManager {
     }
 
     public void updateIndexes(){
+        ReferenceTable.keys().asIterator().forEachRemaining(refer->ReferenceTable.remove(refer));
         for(int i =0; i<NodeList.size();i++){
             Vec3i loc = NodeList.get(i).Location;
             ReferenceTable.put(loc,i);
@@ -33,5 +34,13 @@ public class NodeManager {
 
     public int getNodeIndex(Vec3 vector){
         return ReferenceTable.get(vector);
+    }
+
+    /**
+     *
+     * @return The distance weight from the given node to the given end node.
+     */
+    double getDistanceWeight(Vec3i CurrentNode, Vec3i FinalNode){
+
     }
 }
