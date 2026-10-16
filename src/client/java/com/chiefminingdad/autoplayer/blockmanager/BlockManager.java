@@ -8,7 +8,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 /**
- * [BlockManager] handles all getting and storing of [BlockState] data to find the best path.
+ * {@link BlockManager} handles all getting and storing of {@link BlockState} data to find the best path.
  */
 public class BlockManager {
     NodeManager nodeManager;
