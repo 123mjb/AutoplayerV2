@@ -1,7 +1,6 @@
-package com.chiefminingdad.autoplayer;
+package com.chiefminingdad.autoplayer.node;
 
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.phys.Vec3;
 
 public class Node {
     public Vec3i Location;
