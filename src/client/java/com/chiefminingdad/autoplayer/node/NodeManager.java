@@ -10,9 +10,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class NodeManager {
-    Dictionary<Vec3i, Integer> ReferenceTable = new Hashtable<>();
+    public Dictionary<Vec3i, Integer> ReferenceTable = new Hashtable<>();
 
-    ArrayList<Node> NodeList = new ArrayList<>();
+    public ArrayList<Node> NodeList = new ArrayList<>();
 
     public NodeManager(Node first){
         NodeList.add(first);
