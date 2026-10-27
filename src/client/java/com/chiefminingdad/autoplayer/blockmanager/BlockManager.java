@@ -1,11 +1,15 @@
 package com.chiefminingdad.autoplayer.blockmanager;
 
 import com.chiefminingdad.autoplayer.node.NodeManager;
+import com.mojang.brigadier.context.CommandContext;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Dictionary;
@@ -22,7 +26,7 @@ public class BlockManager{
 
     private Minecraft client;
     private ClientLevel clientLevel;
-    private User user;
+    private Player player;
 
     public Minecraft getClient(){
         if(client==null) client = Minecraft.getInstance();
@@ -34,9 +38,9 @@ public class BlockManager{
         return clientLevel;
     }
     
-    public User getUser(){
-        if(user == null) user = getClient().getUser();
-        return user;
+    public Player getPlayer(){
+        if(player == null) player = getClient().player;
+        return player;
     }
 
     public BlockManager(){
@@ -57,11 +61,14 @@ public class BlockManager{
         });
         return changed.get();
     }
+    public BlockState getBlockState(Vec3i location){
+        return getBlockState(location, getClientLevel());
+    }
 
-    public BlockState getBlockState(Vec3i location) throws RuntimeException{
-        if(getClientLevel()==null) throw new RuntimeException("Level not initialised.");
+    public static BlockState getBlockState(Vec3i location, ClientLevel level) throws RuntimeException{
+        if(level==null) throw new RuntimeException("Level not initialised.");
 
-        return clientLevel.getBlockState(new BlockPos(location));
+        return level.getBlockState(new BlockPos(location));
     }
 
     public void setNodeManager(NodeManager newNodeManager){
@@ -72,5 +79,21 @@ public class BlockManager{
         blockStateDictionary = new Hashtable<>();
     }
 
+    public static class Tests{
+        public static int getBlock(CommandContext<FabricClientCommandSource> commandContext){
+            try {
+                Minecraft client = Minecraft.getInstance();
+                ClientLevel level = client.level;
+                Player player = client.player;
+
+                BlockState blockState = getBlockState(player.getOnPos(),level);
+
+                commandContext.getSource().sendFeedback(Component.literal(blockState.toString()));
+            } catch (Exception e) {
+                return 0;
+            }
+            return 1;
+        }
+    }
 
 }
