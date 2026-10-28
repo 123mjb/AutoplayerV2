@@ -30,7 +30,8 @@ public class CommandManager {
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->{
             dispatcher.register(ClientCommands.literal("move")
                     .executes(context -> {
-                        context.getSource().sendFeedback(Component.literal("Called move with no arguments."));
+                        context.getSource().sendFeedback(Component.literal("Toggled Pathfinding"));
+                        AutoPlayerClient.pathManager.running = !AutoPlayerClient.pathManager.running;
                         return 1;
                     }).then(ClientCommands.argument("Coordinates", new BlockPosArgumentType()).executes(AutoPlayerClient::setPathManagerWithCommand))
 

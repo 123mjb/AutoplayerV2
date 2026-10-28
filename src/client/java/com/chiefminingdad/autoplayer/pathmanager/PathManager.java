@@ -1,5 +1,6 @@
 package com.chiefminingdad.autoplayer.pathmanager;
 
+import com.chiefminingdad.autoplayer.AutoPlayer;
 import com.chiefminingdad.autoplayer.AutoPlayerClient;
 import com.chiefminingdad.autoplayer.node.Node;
 import com.chiefminingdad.autoplayer.node.NodeManager;
@@ -13,6 +14,8 @@ import net.minecraft.world.entity.player.Player;
 public class PathManager {
     public NodeManager nodeManager;
     public Vec3i endLocation;
+    public Node[] Path = new Node[0];
+    public Boolean running = false;
 
     private Minecraft client;
     private Player player;
@@ -45,6 +48,7 @@ public class PathManager {
     public void updateStartLocation(Vec3i newStartingLocation){
         nodeManager.resetStartNode(new Node(newStartingLocation,0));
         AutoPlayerClient.blockManager.reset();
+        Path = new Node[0];
     }
 
     // TODO: Add code to keep BlockManager up to date and run PathManager.run() from another thread so it doesnt impact performance.
@@ -52,15 +56,26 @@ public class PathManager {
      * Runs one round of expanding the path.
      */
     public void run(){
+        //AutoPlayer.LOGGER.atInfo().log("running");
         setAllWeights();
 
         Vec3i nextVector = getBestNextNode();
         Node nextNode = nodeManager.getNode(nextVector);
+        nextNode.searched = true;
+        //AutoPlayer.LOGGER.atInfo().log(nextNode.toString());
 
-
-        Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
-        setBetterNodeWeights(duplicateNodes, nextNode);
-
+        if (nextNode.layer<=10&&nextVector!=endLocation) {
+            Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
+            setBetterNodeWeights(duplicateNodes, nextNode);
+        }else {
+            Node[] finalPath = new Node[nextNode.layer + 1];
+            Node currentNode = nextNode;
+            do {
+                finalPath[currentNode.layer] = currentNode;
+                currentNode = nodeManager.getNode(currentNode.previousLocation);
+            } while (currentNode != null);
+            Path = finalPath;
+        }
     }
 
     /**
@@ -87,7 +102,7 @@ public class PathManager {
 
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
             Node current = nodeManager.getNode(i);
-            if(current.weight< bestNode.weight){
+            if(!current.searched && current.weight< bestNode.weight){
                 bestNode = current;
             }
         }

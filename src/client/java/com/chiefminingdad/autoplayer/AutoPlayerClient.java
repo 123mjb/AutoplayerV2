@@ -14,15 +14,18 @@ public class AutoPlayerClient implements ClientModInitializer {
 	public static final BlockManager blockManager = new BlockManager();
 	public static final CommandManager commandManager = new CommandManager();
 	public static PathManager pathManager;
+	public static Thread thread;
 
 	@Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-
 	}
 
 	public static void setPathManager(Vec3i endLocation){
 		pathManager = new PathManager(endLocation);
+		pathManager.running = true;
+		thread = new Thread(new runPathManager());
+		thread.start();
 	}
 
 	public static int setPathManagerWithCommand(CommandContext<FabricClientCommandSource> commandContext){
@@ -34,5 +37,14 @@ public class AutoPlayerClient implements ClientModInitializer {
 			return 0;
 		}
 		return 1;
+	}
+
+	private static class runPathManager extends Thread{
+		public void run() {
+			while(pathManager != null&&pathManager.Path.length==0) {
+				if (pathManager.running) pathManager.run();
+			}
+			AutoPlayer.LOGGER.info("Ended Pathfinding");
+		}
 	}
 }

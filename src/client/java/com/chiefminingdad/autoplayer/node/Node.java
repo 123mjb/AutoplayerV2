@@ -7,6 +7,7 @@ public class Node {
     public Vec3i location;
     public Vec3i previousLocation;
     public int layer = -1;
+    public boolean searched = false;
 
     public double weight = -1;
 
@@ -28,5 +29,9 @@ public class Node {
         this.layer = layer;
     }
 
+    @Override
+    public String toString(){
+        return String.format("Node(Location:%s,PreviousLocation:%s)",location.toString(),previousLocation==null?"Empty":previousLocation.toString());
+    }
 
 }

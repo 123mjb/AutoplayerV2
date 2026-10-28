@@ -1,5 +1,6 @@
 package com.chiefminingdad.autoplayer.node;
 
+import com.chiefminingdad.autoplayer.AutoPlayer;
 import net.minecraft.core.Vec3i;
 import org.jspecify.annotations.NonNull;
 
@@ -102,6 +103,7 @@ public class NodeManager {
         ArrayList<Vec3i> duplicates = new ArrayList<>();
 
         for (Vec3i vector : surrounding) {
+            // AutoPlayer.LOGGER.atInfo().log(vector.toString());
             if (!containsVector(vector)){
                 addNode(new Node(vector,centre.location,centre.layer+1));
             }
@@ -119,7 +121,7 @@ public class NodeManager {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 for (int k = -1; k <= 1; k++) {
-                    if (i != 0 && j != 0 && k != 0) {
+                    if (!(i == 0 && j == 0 && k == 0)) {
                         surrounding[loc] = centre.offset(i, j, k);
                         loc++;
                     }
