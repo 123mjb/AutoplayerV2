@@ -10,8 +10,29 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class AutoPlayerClient implements ClientModInitializer {
-	public static final BlockManager blockManager = new BlockManager();
+	public static final FileWriter fileWriter;
+
+    static {
+        try {
+            fileWriter = new FileWriter("C:\\Users\\micah\\IdeaProjects\\AutoplayerV2\\run\\logs\\Mylogs.txt");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+	public static void writeLog(String log){
+		try {
+            fileWriter.write(log);
+        } catch (IOException e) {
+            AutoPlayer.LOGGER.error("Failed Logging");
+        }
+    }
+
+    public static final BlockManager blockManager = new BlockManager();
 	public static final CommandManager commandManager = new CommandManager();
 	public static PathManager pathManager;
 	public static Thread thread;

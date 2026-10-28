@@ -8,6 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Arrays;
+
 /**
  * Manages the logic for all the pathfinding so that most of the logic is in one place and easier to read.
  */
@@ -56,25 +58,32 @@ public class PathManager {
      * Runs one round of expanding the path.
      */
     public void run(){
-        //AutoPlayer.LOGGER.atInfo().log("running");
+        AutoPlayer.LOGGER.atInfo().log("running");
+        AutoPlayerClient.writeLog("running");
         setAllWeights();
 
         Vec3i nextVector = getBestNextNode();
         Node nextNode = nodeManager.getNode(nextVector);
         nextNode.searched = true;
+        AutoPlayerClient.writeLog(nextNode +"\n");
         //AutoPlayer.LOGGER.atInfo().log(nextNode.toString());
 
-        if (nextNode.layer<=10&&nextVector!=endLocation) {
+        if (!(nextNode.layer>10||nextVector==endLocation)) {
+            AutoPlayer.LOGGER.atInfo().log("running2");
             Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
             setBetterNodeWeights(duplicateNodes, nextNode);
         }else {
+            AutoPlayer.LOGGER.atInfo().log("running3");
             Node[] finalPath = new Node[nextNode.layer + 1];
             Node currentNode = nextNode;
             do {
+                AutoPlayer.LOGGER.atInfo().log(currentNode.toString());
                 finalPath[currentNode.layer] = currentNode;
                 currentNode = nodeManager.getNode(currentNode.previousLocation);
-            } while (currentNode != null);
+            } while (currentNode.layer!=0);
+            finalPath[currentNode.layer] = currentNode;
             Path = finalPath;
+            AutoPlayer.LOGGER.info(Arrays.toString(finalPath));
         }
     }
 
@@ -99,10 +108,12 @@ public class PathManager {
     private Vec3i getBestNextNode(){
         Node bestNode = new Node(new Vec3i(0,0,0));
         bestNode.weight = Double.MAX_VALUE;
+        double bestWeight = Double.MAX_VALUE;
 
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
             Node current = nodeManager.getNode(i);
-            if(!current.searched && current.weight< bestNode.weight){
+            double currentWeight = current.weight + NodeManager.getDistanceWeight(current.location,endLocation);
+            if(!current.searched && currentWeight< bestWeight){
                 bestNode = current;
             }
         }

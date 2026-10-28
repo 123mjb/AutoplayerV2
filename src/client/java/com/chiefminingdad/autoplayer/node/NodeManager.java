@@ -86,10 +86,11 @@ public class NodeManager {
      *
      * @return The distance weight from the given node to the given end node.
      */
-    double getDistanceWeight(@NonNull Vec3i CurrentNode, Vec3i FinalNode) {
+    public static double getDistanceWeight(@NonNull Vec3i CurrentNode, Vec3i FinalNode) {
         double manhattanWeight = CurrentNode.distManhattan(FinalNode);
         double sqrWeight = CurrentNode.distSqr(FinalNode);
-        return Math.sqrt((Math.pow(manhattanWeight, 2) + Math.pow(sqrWeight, 2)) / 2);
+//        return Math.sqrt((Math.pow(manhattanWeight, 2) + Math.pow(sqrWeight, 2)) / 2);
+        return sqrWeight;
     }
 
     /**
