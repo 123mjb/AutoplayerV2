@@ -28,14 +28,14 @@ public class PathManager {
     }
 
     public PathManager(Vec3i startingLocation,Vec3i finalLocation){
-        nodeManager = new NodeManager(new Node(startingLocation));
+        nodeManager = new NodeManager(new Node(startingLocation,0));
         AutoPlayerClient.blockManager.setNodeManager(nodeManager);
         endLocation = finalLocation;
     }
 
     public PathManager(Vec3i finalLocation){
         endLocation = finalLocation;
-        nodeManager = new NodeManager(new Node(getPlayer().getOnPos().above()));
+        nodeManager = new NodeManager(new Node(getPlayer().getOnPos().above(),0));
     }
 
     /**
@@ -43,7 +43,7 @@ public class PathManager {
      * @param newStartingLocation the new location pathfinding will start from.
      */
     public void updateStartLocation(Vec3i newStartingLocation){
-        nodeManager.resetStartNode(new Node(newStartingLocation));
+        nodeManager.resetStartNode(new Node(newStartingLocation,0));
         AutoPlayerClient.blockManager.reset();
     }
 
@@ -54,10 +54,12 @@ public class PathManager {
     public void run(){
         setAllWeights();
 
-        Vec3i nextNode = getBestNextNode();
+        Vec3i nextVector = getBestNextNode();
+        Node nextNode = nodeManager.getNode(nextVector);
+
 
         Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
-        setBetterNodeWeights(duplicateNodes,nextNode);
+        setBetterNodeWeights(duplicateNodes, nextNode);
 
     }
 
@@ -67,10 +69,10 @@ public class PathManager {
      * @param newNodes The {@link Vec3i}s that encountered a collision.
      * @param previousNode The location of the previous Node the new ones were generated from.
      */
-    private void setBetterNodeWeights(Vec3i[] newNodes, Vec3i previousNode){
+    private void setBetterNodeWeights(Vec3i[] newNodes, Node previousNode){
         for(Vec3i vector: newNodes){
             Node storedNode = nodeManager.getNode(vector);
-            Node newNode = new Node(vector,previousNode);
+            Node newNode = new Node(vector,previousNode.location,previousNode.layer+1);
             double newNodeWeight = generateWeightValue(newNode);
             if(newNodeWeight < storedNode.weight){
                 newNode.weight = newNodeWeight;

@@ -97,13 +97,13 @@ public class NodeManager {
      * @param centre The position for all the new vectors to come from.
      * @return {@link Vec3i}[] The array of all locations that had a duplicate already stored.
      */
-    public Vec3i[] addSurroundingNodes(Vec3i centre) {
-        Vec3i[] surrounding = getSurrounding(centre);
+    public Vec3i[] addSurroundingNodes(Node centre) {
+        Vec3i[] surrounding = getSurrounding(centre.location);
         ArrayList<Vec3i> duplicates = new ArrayList<>();
 
         for (Vec3i vector : surrounding) {
             if (!containsVector(vector)){
-                addNode(new Node(vector,centre));
+                addNode(new Node(vector,centre.location,centre.layer+1));
             }
             else {
                 duplicates.add(vector);

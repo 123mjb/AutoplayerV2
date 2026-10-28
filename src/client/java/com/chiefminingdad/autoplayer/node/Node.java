@@ -1,10 +1,12 @@
 package com.chiefminingdad.autoplayer.node;
 
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public class Node {
     public Vec3i location;
     public Vec3i previousLocation;
+    public int layer = -1;
 
     public double weight = -1;
 
@@ -12,8 +14,18 @@ public class Node {
         this.location = location;
         this.previousLocation = previousLocation;
     }
+    public Node(Vec3i location, Vec3i previousLocation, int layer){
+        this.location = location;
+        this.previousLocation = previousLocation;
+        this.layer = layer;
+    }
     public Node(Vec3i location){
         this.location = location;
+    }
+
+    public Node(Vec3i location, int layer){
+        this.location = location;
+        this.layer = layer;
     }
 
 
