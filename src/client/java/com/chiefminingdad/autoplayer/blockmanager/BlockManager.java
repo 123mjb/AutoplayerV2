@@ -4,7 +4,6 @@ import com.chiefminingdad.autoplayer.node.NodeManager;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -86,6 +85,7 @@ public class BlockManager{
                 ClientLevel level = client.level;
                 Player player = client.player;
 
+                if (player==null) throw new RuntimeException("Player Is Null, Is this being run outside a world?");
                 BlockState blockState = getBlockState(player.getOnPos(),level);
 
                 commandContext.getSource().sendFeedback(Component.literal(blockState.toString()));

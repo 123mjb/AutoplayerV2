@@ -1,10 +1,8 @@
 package com.chiefminingdad.autoplayer.types;
 
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;

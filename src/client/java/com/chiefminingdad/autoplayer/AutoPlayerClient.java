@@ -7,12 +7,8 @@ import com.chiefminingdad.autoplayer.types.Coords;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
 
 public class AutoPlayerClient implements ClientModInitializer {
 	public static final BlockManager blockManager = new BlockManager();

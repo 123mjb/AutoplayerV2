@@ -6,8 +6,6 @@ import com.chiefminingdad.autoplayer.blockmanager.BlockManager;
 import com.chiefminingdad.autoplayer.types.arguments.BlockPosArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 
 public class CommandManager {
