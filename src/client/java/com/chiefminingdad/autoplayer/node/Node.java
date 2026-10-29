@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public class Node {
     public Vec3i location;
-    public Vec3i previousLocation;
+    public Vec3i previousLocation = null;
     public int layer = -1;
     public boolean searched = false;
 
@@ -31,7 +31,7 @@ public class Node {
 
     @Override
     public String toString(){
-        return String.format("Node(Location:%s,PreviousLocation:%s)",location.toString(),previousLocation==null?"Empty":previousLocation.toString());
+        return String.format("Node(Loc:%s,PrevLoc:%s,Weight:%f)",location+"",previousLocation==null?"Empty":previousLocation+"",weight);
     }
 
 }

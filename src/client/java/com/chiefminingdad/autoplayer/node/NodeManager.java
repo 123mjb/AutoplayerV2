@@ -78,7 +78,7 @@ public class NodeManager {
     }
 
     public boolean containsVector(Vec3i vector) {
-        return ReferenceTable.getOrDefault(vector, -1) > 0;
+        return ReferenceTable.getOrDefault(vector, -1) >= 0;
     }
 
     /**

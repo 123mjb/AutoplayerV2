@@ -148,6 +148,7 @@ public class PathManager {
     }
     private double generateWeightValue(Node currentNode){
         Node previousNode = nodeManager.getNode(currentNode.previousLocation);
+        if (currentNode.previousLocation==null) return 0;
         return currentNode.location.distSqr(previousNode.location) + previousNode.weight;
     }
 
