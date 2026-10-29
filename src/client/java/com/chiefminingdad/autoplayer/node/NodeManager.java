@@ -5,6 +5,7 @@ import net.minecraft.core.Vec3i;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -43,6 +44,7 @@ public class NodeManager {
     public void addNode(@NonNull Node newNode) {
         ReferenceTable.put(newNode.location, NodeList.size());
         NodeList.add(newNode);
+//        AutoPlayer.LOGGER.info("{}", newNode);
     }
 
     /**
@@ -66,7 +68,8 @@ public class NodeManager {
     }
 
     public Node getNode(Vec3i vector){
-        return NodeList.get(getNodeIndex(vector));
+        int index  = getNodeIndex(vector);
+        return index == -1? null : NodeList.get(index);
     }
 
     public Node getNode(int index){
@@ -89,8 +92,9 @@ public class NodeManager {
     public static double getDistanceWeight(@NonNull Vec3i CurrentNode, Vec3i FinalNode) {
         double manhattanWeight = CurrentNode.distManhattan(FinalNode);
         double sqrWeight = CurrentNode.distSqr(FinalNode);
+        if(sqrWeight == 0) return 0;
 //        return Math.sqrt((Math.pow(manhattanWeight, 2) + Math.pow(sqrWeight, 2)) / 2);
-        return sqrWeight;
+        return Math.sqrt(sqrWeight);
     }
 
     /**
@@ -102,7 +106,7 @@ public class NodeManager {
     public Vec3i[] addSurroundingNodes(Node centre) {
         Vec3i[] surrounding = getSurrounding(centre.location);
         ArrayList<Vec3i> duplicates = new ArrayList<>();
-
+//        AutoPlayer.LOGGER.info(Arrays.toString(surrounding));
         for (Vec3i vector : surrounding) {
             // AutoPlayer.LOGGER.atInfo().log(vector.toString());
             if (!containsVector(vector)){
@@ -112,24 +116,22 @@ public class NodeManager {
                 duplicates.add(vector);
             }
         }
-
+//        AutoPlayer.LOGGER.info(duplicates.toString());
         return duplicates.toArray(new Vec3i[0]);
     }
 
     public static Vec3i[] getSurrounding(Vec3i centre) {
-        Vec3i[] surrounding = new Vec3i[26];
-        int loc = 0;
+        ArrayList<Vec3i> surrounding = new ArrayList<>();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 for (int k = -1; k <= 1; k++) {
-                    if (!(i == 0 && j == 0 && k == 0)) {
-                        surrounding[loc] = centre.offset(i, j, k);
-                        loc++;
+                    if (!(i == 0 && j == 0 && k == 0) ) {
+                        surrounding.add(centre.offset(i, j, k));
                     }
                 }
             }
         }
-        return surrounding;
+        return surrounding.toArray(new Vec3i[0]);
     }
 
 

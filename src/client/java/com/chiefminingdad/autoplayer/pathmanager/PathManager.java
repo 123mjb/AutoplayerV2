@@ -58,19 +58,23 @@ public class PathManager {
      * Runs one round of expanding the path.
      */
     public void run(){
-        AutoPlayer.LOGGER.atInfo().log("running");
+        AutoPlayer.LOGGER.atInfo().log("running"+endLocation);
         AutoPlayerClient.writeLog("running");
-        setAllWeights();
 
+        setAllWeights();
         Vec3i nextVector = getBestNextNode();
+        AutoPlayer.LOGGER.info(nextVector.toShortString());
         Node nextNode = nodeManager.getNode(nextVector);
         nextNode.searched = true;
-        AutoPlayerClient.writeLog(nextNode +"\n");
-        //AutoPlayer.LOGGER.atInfo().log(nextNode.toString());
+//        AutoPlayerClient.writeLog(nextNode +"\n");
+        AutoPlayer.LOGGER.atInfo().log(nextNode+" "+NodeManager.getDistanceWeight(nextNode.location,endLocation));
+        Node gudNode = nodeManager.getNode(new Vec3i(10,-60,10));
+        AutoPlayer.LOGGER.info(gudNode!=null?gudNode+" "+NodeManager.getDistanceWeight(gudNode.location,endLocation):"");
 
-        if (!(nextNode.layer>10||nextVector==endLocation)) {
+        if (!(nextNode.layer>10||nextVector.equals(endLocation))) {
             AutoPlayer.LOGGER.atInfo().log("running2");
             Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
+            setAllWeights();
             setBetterNodeWeights(duplicateNodes, nextNode);
         }else {
             AutoPlayer.LOGGER.atInfo().log("running3");
@@ -113,8 +117,9 @@ public class PathManager {
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
             Node current = nodeManager.getNode(i);
             double currentWeight = current.weight + NodeManager.getDistanceWeight(current.location,endLocation);
-            if(!current.searched && currentWeight< bestWeight){
+            if(!current.searched && current.weight>=0 && currentWeight< bestWeight){
                 bestNode = current;
+                bestWeight = currentWeight;
             }
         }
         return bestNode.location;
@@ -144,12 +149,12 @@ public class PathManager {
      * @return The weight of the current Node
      */
     private double generateWeightValue(Node currentNode, Node previousNode){
-        return currentNode.location.distSqr(previousNode.location) + previousNode.weight;
+        return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
     }
     private double generateWeightValue(Node currentNode){
         Node previousNode = nodeManager.getNode(currentNode.previousLocation);
         if (currentNode.previousLocation==null) return 0;
-        return currentNode.location.distSqr(previousNode.location) + previousNode.weight;
+        return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
     }
 
 
