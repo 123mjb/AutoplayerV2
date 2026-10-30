@@ -27,6 +27,9 @@ public class PathManager {
         return client;
     }
 
+    /**
+     * @return
+     */
     public Player getPlayer(){
         if(player == null) player = getClient().player;
         return player;
@@ -53,42 +56,39 @@ public class PathManager {
         Path = new Node[0];
     }
 
-    // TODO: Add code to keep BlockManager up to date and run PathManager.run() from another thread so it doesnt impact performance.
+    // TODO: Add code to keep BlockManager up to date.
     /**
      * Runs one round of expanding the path.
      */
     public void run(){
-        AutoPlayer.LOGGER.atInfo().log("running"+endLocation);
-        AutoPlayerClient.writeLog("running");
-
         setAllWeights();
         Vec3i nextVector = getBestNextNode();
-        AutoPlayer.LOGGER.info(nextVector.toShortString());
         Node nextNode = nodeManager.getNode(nextVector);
         nextNode.searched = true;
-//        AutoPlayerClient.writeLog(nextNode +"\n");
-        AutoPlayer.LOGGER.atInfo().log(nextNode+" "+NodeManager.getDistanceWeight(nextNode.location,endLocation));
-        Node gudNode = nodeManager.getNode(new Vec3i(10,-60,10));
-        AutoPlayer.LOGGER.info(gudNode!=null?gudNode+" "+NodeManager.getDistanceWeight(gudNode.location,endLocation):"");
 
         if (!(nextNode.layer>10||nextVector.equals(endLocation))) {
-            AutoPlayer.LOGGER.atInfo().log("running2");
             Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
             setAllWeights();
             setBetterNodeWeights(duplicateNodes, nextNode);
         }else {
-            AutoPlayer.LOGGER.atInfo().log("running3");
-            Node[] finalPath = new Node[nextNode.layer + 1];
-            Node currentNode = nextNode;
-            do {
-                AutoPlayer.LOGGER.atInfo().log(currentNode.toString());
-                finalPath[currentNode.layer] = currentNode;
-                currentNode = nodeManager.getNode(currentNode.previousLocation);
-            } while (currentNode.layer!=0);
-            finalPath[currentNode.layer] = currentNode;
-            Path = finalPath;
-            AutoPlayer.LOGGER.info(Arrays.toString(finalPath));
+            traceBackPath(nextNode);
         }
+    }
+
+    /**
+     * Once the pathfinding has found its way to the end this with trace the path back to the start.
+     * @param finalNode The end node for this path.
+     */
+    private void traceBackPath(Node finalNode){
+        Node[] finalPath = new Node[finalNode.layer + 1];
+        Node currentNode = finalNode;
+        do {
+            finalPath[currentNode.layer] = currentNode;
+            currentNode = nodeManager.getNode(currentNode.previousLocation);
+        } while (currentNode.layer!=0);
+        finalPath[currentNode.layer] = currentNode;
+
+        this.Path = finalPath;
     }
 
     /**
@@ -109,6 +109,10 @@ public class PathManager {
         }
     }
 
+    /**
+     *
+     * @return The node with the lowest Weight + Heuristic that hasn't been checked before.
+     */
     private Vec3i getBestNextNode(){
         Node bestNode = new Node(new Vec3i(0,0,0));
         bestNode.weight = Double.MAX_VALUE;
@@ -125,6 +129,9 @@ public class PathManager {
         return bestNode.location;
     }
 
+    /**
+     * Goes through every {@link Node} in {@link NodeManager#NodeList} and sets it's weight if it has not been set yet.
+     */
     private void setAllWeights(){
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
             if(nodeManager.getNode(i).weight<0) {
@@ -133,7 +140,10 @@ public class PathManager {
         }
     }
 
-
+    /**
+     * Sets the weight of the specified
+     * @param index The index of the node in {@link NodeManager#NodeList}
+     */
     private void setWeight(int index){
         Node node = nodeManager.NodeList.get(index);
         if(node.previousLocation ==null){
@@ -147,11 +157,19 @@ public class PathManager {
 
     /**
      * At the moment a primitive implementation to check that the rest of the systems work first.
+     * @param currentNode The node to get the Weight of.
+     * @param previousNode The node before the current node.
      * @return The weight of the current Node
      */
     private double generateWeightValue(Node currentNode, Node previousNode){
         return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
     }
+
+    /**
+     * At the moment a primitive implementation to check that the rest of the systems work first.
+     * @param currentNode The node to get the Weight of.
+     * @return The weight of the current Node
+     */
     private double generateWeightValue(Node currentNode){
         Node previousNode = nodeManager.getNode(currentNode.previousLocation);
         if (currentNode.previousLocation==null) return 0;
