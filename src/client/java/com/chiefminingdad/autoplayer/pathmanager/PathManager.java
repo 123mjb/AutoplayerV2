@@ -133,6 +133,7 @@ public class PathManager {
         }
     }
 
+
     private void setWeight(int index){
         Node node = nodeManager.NodeList.get(index);
         if(node.previousLocation ==null){

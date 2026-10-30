@@ -1,0 +1,9 @@
+com.chiefminingdad.autoplayer
+com.chiefminingdad.autoplayer.blockmanager
+com.chiefminingdad.autoplayer.commandmanager
+com.chiefminingdad.autoplayer.graphics
+com.chiefminingdad.autoplayer.mixin
+com.chiefminingdad.autoplayer.node
+com.chiefminingdad.autoplayer.pathmanager
+com.chiefminingdad.autoplayer.types
+com.chiefminingdad.autoplayer.types.arguments
