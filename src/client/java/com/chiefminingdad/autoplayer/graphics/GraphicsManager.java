@@ -52,6 +52,10 @@ public class GraphicsManager implements ClientModInitializer {
         LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(this::renderAndDrawLines);
     }
 
+    /**
+     * Should extract the finished Path and store it for use here.
+     * @param context Data that is not used right now.
+     */
     private void ExtractLineLocations(LevelExtractionContext context){
         Node[] Path = AutoPlayerClient.pathManager.Path;
         Lines = new Line[Path.length-1];

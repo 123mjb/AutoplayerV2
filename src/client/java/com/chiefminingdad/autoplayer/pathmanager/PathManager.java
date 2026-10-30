@@ -1,14 +1,11 @@
 package com.chiefminingdad.autoplayer.pathmanager;
 
-import com.chiefminingdad.autoplayer.AutoPlayer;
 import com.chiefminingdad.autoplayer.AutoPlayerClient;
 import com.chiefminingdad.autoplayer.node.Node;
 import com.chiefminingdad.autoplayer.node.NodeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.Arrays;
 
 /**
  * Manages the logic for all the pathfinding so that most of the logic is in one place and easier to read.
@@ -22,25 +19,37 @@ public class PathManager {
     private Minecraft client;
     private Player player;
 
+    /**
+     * @return The Minecraft instance if it is instantiated.
+     */
     public Minecraft getClient(){
         if(client==null) client = Minecraft.getInstance();
         return client;
     }
 
     /**
-     * @return
+     * @return The Player instance if the game is instantiated.
      */
     public Player getPlayer(){
         if(player == null) player = getClient().player;
         return player;
     }
 
+    /**
+     * Creates an instance where the starting location is the given.
+     * @param startingLocation The starting location for the algorithm.
+     * @param finalLocation The location the algorithm will pathfind to.
+     */
     public PathManager(Vec3i startingLocation,Vec3i finalLocation){
         nodeManager = new NodeManager(new Node(startingLocation,0));
         AutoPlayerClient.blockManager.setNodeManager(nodeManager);
         endLocation = finalLocation;
     }
 
+    /**
+     * Creates an instance where the starting location is the player's location.
+     * @param finalLocation The location the algorithm will pathfind to.
+     */
     public PathManager(Vec3i finalLocation){
         endLocation = finalLocation;
         nodeManager = new NodeManager(new Node(getPlayer().getOnPos().above(),0));
@@ -110,8 +119,7 @@ public class PathManager {
     }
 
     /**
-     *
-     * @return The node with the lowest Weight + Heuristic that hasn't been checked before.
+     * @return The location of the node with the lowest Weight + Heuristic that hasn't been checked before.
      */
     private Vec3i getBestNextNode(){
         Node bestNode = new Node(new Vec3i(0,0,0));
@@ -175,6 +183,4 @@ public class PathManager {
         if (currentNode.previousLocation==null) return 0;
         return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
     }
-
-
 }

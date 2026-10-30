@@ -8,12 +8,18 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Contains the needed logic for registering commands.
+ */
 public class CommandManager {
     public CommandManager(){
         registerTest();
         registerMove();
     }
 
+    /**
+     * Registers the "test2" command which has all the in game tests implemented to make sure features are working correctly.
+     */
     private void registerTest(){
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->{
             dispatcher.register(ClientCommands.literal("test2")
@@ -26,6 +32,9 @@ public class CommandManager {
         }));
     }
 
+    /**
+     * Registers the move command which is used to start and toggle the pathfinding.
+     */
     private void registerMove(){
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->{
             dispatcher.register(ClientCommands.literal("move")
