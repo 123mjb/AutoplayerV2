@@ -15,23 +15,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AutoPlayerClient implements ClientModInitializer {
-	public static final FileWriter fileWriter;
-
-    static {
-        try {
-            fileWriter = new FileWriter("C:\\Users\\micah\\IdeaProjects\\AutoplayerV2\\run\\logs\\Mylogs.txt");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-	public static void writeLog(String log){
-		try {
-            fileWriter.write(log);
-        } catch (IOException e) {
-            AutoPlayer.LOGGER.error("Failed Logging");
-        }
-    }
-
     public static final BlockManager blockManager = new BlockManager();
 	public static final CommandManager commandManager = new CommandManager();
 	public static PathManager pathManager;
@@ -42,6 +25,11 @@ public class AutoPlayerClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 	}
 
+	/**
+	 * Creates a new pathManager instance with the end location as, now the world should be loaded.
+	 * Then it creates the Thread that runs the algorithm and starts it off.
+	 * @param endLocation The location the algorithm will pathfind to.
+	 */
 	public static void setPathManager(Vec3i endLocation){
 		pathManager = new PathManager(endLocation);
 		pathManager.running = true;
@@ -49,6 +37,12 @@ public class AutoPlayerClient implements ClientModInitializer {
 		thread.start();
 	}
 
+	/**
+	 * Gets from the context of the command the Coordinates the User wants to pathfind and calls {@link setPathManager}
+	 * with that location as the endLocation.
+	 * @param commandContext The context passed on from the command move.
+	 * @return Whether the code worked.
+	 */
 	public static int setPathManagerWithCommand(CommandContext<FabricClientCommandSource> commandContext){
 		try {
 			Vec3i blockPos = commandContext.getArgument("Coordinates", Coords.class).getPositioni(commandContext.getSource());
@@ -60,6 +54,9 @@ public class AutoPlayerClient implements ClientModInitializer {
 		return 1;
 	}
 
+	/**
+	 * Thread that runs the pathfinding algorithm separate from the main thread so it doesn't affect performance.
+	 */
 	private static class runPathManager extends Thread{
 		public void run() {
 			while(pathManager != null&&pathManager.Path.length==0) {

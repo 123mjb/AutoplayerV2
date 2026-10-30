@@ -1,11 +1,9 @@
 package com.chiefminingdad.autoplayer.node;
 
-import com.chiefminingdad.autoplayer.AutoPlayer;
 import net.minecraft.core.Vec3i;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -59,7 +57,6 @@ public class NodeManager {
     }
 
     /**
-     *
      * @param vector The position of the requested Node in the world.
      * @return The index of the node with the specified coordinate in the list.
      */
@@ -67,26 +64,43 @@ public class NodeManager {
         return ReferenceTable.getOrDefault(vector, -1);
     }
 
+    /**
+     * @param vector The location of the node to get.
+     * @return The {@link Node} at the location given.
+     */
     public Node getNode(Vec3i vector){
         int index  = getNodeIndex(vector);
         return index == -1? null : NodeList.get(index);
     }
 
+    /**
+     * @param index The index in {@link NodeManager#NodeList} to get.
+     * @return The Node at the given index.
+     */
     public Node getNode(int index){
         return NodeList.get(index);
     }
 
+    /**
+     *
+     * @param vector The location of the {@link Node} that is being set/replaced.
+     * @param newNode The Node that will replace the current stored Node
+     */
     public void setNode(Vec3i vector, Node newNode){
         NodeList.set(getNodeIndex(vector), newNode);
     }
 
+    /**
+     *
+     * @param vector The vector to check whether is stored.
+     * @return Whether there is a Vector of the same value stored.
+     */
     public boolean containsVector(Vec3i vector) {
         return ReferenceTable.getOrDefault(vector, -1) >= 0;
     }
 
     /**
      * A function that will be used for the heuristic required for the A* pathfinding algorithm.
-     *
      * @return The distance weight from the given node to the given end node.
      */
     public static double getDistanceWeight(@NonNull Vec3i CurrentNode, Vec3i FinalNode) {
@@ -106,9 +120,7 @@ public class NodeManager {
     public Vec3i[] addSurroundingNodes(Node centre) {
         Vec3i[] surrounding = getSurrounding(centre.location);
         ArrayList<Vec3i> duplicates = new ArrayList<>();
-//        AutoPlayer.LOGGER.info(Arrays.toString(surrounding));
         for (Vec3i vector : surrounding) {
-            // AutoPlayer.LOGGER.atInfo().log(vector.toString());
             if (!containsVector(vector)){
                 addNode(new Node(vector,centre.location,centre.layer+1));
             }
@@ -116,10 +128,14 @@ public class NodeManager {
                 duplicates.add(vector);
             }
         }
-//        AutoPlayer.LOGGER.info(duplicates.toString());
         return duplicates.toArray(new Vec3i[0]);
     }
 
+    /**
+     *
+     * @param centre The location at which to return the surrounding vectors from.
+     * @return An array of all the vectors adjacent to the centre.
+     */
     public static Vec3i[] getSurrounding(Vec3i centre) {
         ArrayList<Vec3i> surrounding = new ArrayList<>();
         for (int i = -1; i <= 1; i++) {
