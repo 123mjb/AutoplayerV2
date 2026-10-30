@@ -33,10 +33,10 @@ import java.util.OptionalDouble;
 
 public class GraphicsManager implements ClientModInitializer {
 
-    private static final RenderPipeline CONNECTED_LINE = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-            .withLocation(AutoPlayer.id("pipeline/connected_line"))
-            .build()
-    );
+//    private static final RenderPipeline CONNECTED_LINE = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+//            .withLocation(AutoPlayer.id("pipeline/connected_line"))
+//            .build()
+//    );
 
     private Line[] Lines;
 
@@ -48,6 +48,7 @@ public class GraphicsManager implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        AutoPlayer.LOGGER.info("E");
         LevelExtractionEvents.END_EXTRACTION.register(this::ExtractLineLocations);
         LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(this::renderAndDrawLines);
     }
@@ -57,24 +58,26 @@ public class GraphicsManager implements ClientModInitializer {
      * @param context Data that is not used right now.
      */
     private void ExtractLineLocations(LevelExtractionContext context){
+        if (AutoPlayerClient.pathManager == null) return;
         Node[] Path = AutoPlayerClient.pathManager.Path;
         Lines = new Line[Path.length-1];
         for (int i = 1; i < Path.length; i++) {
             Node n = Path[i];
-            Lines[i] = new Line(n.previousLocation.getX()+0.5,n.previousLocation.getY(),n.previousLocation.getZ()+0.5,
+            Lines[i-1] = new Line(n.previousLocation.getX()+0.5,n.previousLocation.getY(),n.previousLocation.getZ()+0.5,
                     n.location.getX()+0.5,n.location.getY(),n.location.getZ()+0.5
             );
         }
     }
 
     private void renderAndDrawLines(LevelRenderContext context){
-        RenderPipeline renderPipeline = GraphicsManager.CONNECTED_LINE;
+//        AutoPlayer.LOGGER.info("Rendering");
+        RenderPipeline renderPipeline = RenderPipelines.LINES; //GraphicsManager.CONNECTED_LINE;
         VertexFormat vertexFormat = renderPipeline.getVertexFormatBinding(0);
 
         assert vertexFormat != null;
 
         PrimitiveTopology primitiveTopology = renderPipeline.getPrimitiveTopology();
-        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.LINES ? RenderSystem.getProjectionType().vertexSorting() : null);
+        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.DEBUG_LINES ? RenderSystem.getProjectionType().vertexSorting() : null);
 
         this.renderLines(context,draw);
 
@@ -97,7 +100,7 @@ public class GraphicsManager implements ClientModInitializer {
         matrices.translate(-camera.x,-camera.y,-camera.z);
 
         final VertexConsumer builder = stagedBuffer.getVertexBuilder(draw);
-
+        if(Lines==null) return;
         for(Line line: Lines) {
             this.renderLine(matrices.last().pose(), builder,line);
             matrices.popPose();

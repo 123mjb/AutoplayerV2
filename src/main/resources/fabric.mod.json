@@ -19,7 +19,8 @@
 			"com.chiefminingdad.autoplayer.AutoPlayer"
 		],
 		"client": [
-			"com.chiefminingdad.autoplayer.AutoPlayerClient"
+			"com.chiefminingdad.autoplayer.AutoPlayerClient",
+			"com.chiefminingdad.autoplayer.graphics.GraphicsManager"
 		]
 	},
 	"mixins": [
