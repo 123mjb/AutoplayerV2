@@ -38,6 +38,12 @@ public class GraphicsManager implements ClientModInitializer {
 //            .build()
 //    );
 
+    private static final RenderPipeline LINE_THROUGH_WALLS = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+            .withLocation(AutoPlayer.id("pipeline/line_through_walls"))
+            .withDepthStencilState(Optional.empty())
+            .build()
+    );
+
     private Line[] Lines;
 
     private static final Vector4f COLOR_MODULATOR = new Vector4f(1f, 1f, 1f, 1f);
@@ -60,6 +66,7 @@ public class GraphicsManager implements ClientModInitializer {
     private void ExtractLineLocations(LevelExtractionContext context){
         if (AutoPlayerClient.pathManager == null) return;
         Node[] Path = AutoPlayerClient.pathManager.Path;
+        if (Path == null||Path.length==0) return;
         Lines = new Line[Path.length-1];
         for (int i = 1; i < Path.length; i++) {
             Node n = Path[i];
@@ -71,7 +78,7 @@ public class GraphicsManager implements ClientModInitializer {
 
     private void renderAndDrawLines(LevelRenderContext context){
 //        AutoPlayer.LOGGER.info("Rendering");
-        RenderPipeline renderPipeline = RenderPipelines.LINES; //GraphicsManager.CONNECTED_LINE;
+        RenderPipeline renderPipeline = GraphicsManager.LINE_THROUGH_WALLS; //GraphicsManager.CONNECTED_LINE;
         VertexFormat vertexFormat = renderPipeline.getVertexFormatBinding(0);
 
         assert vertexFormat != null;
@@ -103,13 +110,13 @@ public class GraphicsManager implements ClientModInitializer {
         if(Lines==null) return;
         for(Line line: Lines) {
             this.renderLine(matrices.last().pose(), builder,line);
-            matrices.popPose();
         }
+        matrices.popPose();
     }
 
     private void renderLine(Matrix4fc positionMatrix, VertexConsumer buffer, Line line){
-        buffer.addVertex(positionMatrix, (float) line.startX, (float) line.startY, (float) line.startZ).setColor(0f,1f,0f,0.5f);
-        buffer.addVertex(positionMatrix, (float) line.endX, (float) line.endY, (float) line.endZ).setColor(0f,1f,0f,0.5f);
+        buffer.addVertex(positionMatrix, (float) line.startX, (float) line.startY, (float) line.startZ).setColor(0f,1f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
+        buffer.addVertex(positionMatrix, (float) line.endX, (float) line.endY, (float) line.endZ).setColor(0f,1f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
     }
 
     public static void draw(Minecraft client, StagedVertexBuffer.ExecuteInfo info, RenderPipeline renderPipeline){
