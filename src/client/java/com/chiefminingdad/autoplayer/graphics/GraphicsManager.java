@@ -33,11 +33,6 @@ import java.util.OptionalDouble;
 
 public class GraphicsManager implements ClientModInitializer {
 
-//    private static final RenderPipeline CONNECTED_LINE = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-//            .withLocation(AutoPlayer.id("pipeline/connected_line"))
-//            .build()
-//    );
-
     private static final RenderPipeline LINE_THROUGH_WALLS = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(AutoPlayer.id("pipeline/line_through_walls"))
             .withDepthStencilState(Optional.empty())
@@ -77,7 +72,6 @@ public class GraphicsManager implements ClientModInitializer {
     }
 
     private void renderAndDrawLines(LevelRenderContext context){
-//        AutoPlayer.LOGGER.info("Rendering");
         RenderPipeline renderPipeline = GraphicsManager.LINE_THROUGH_WALLS; //GraphicsManager.CONNECTED_LINE;
         VertexFormat vertexFormat = renderPipeline.getVertexFormatBinding(0);
 

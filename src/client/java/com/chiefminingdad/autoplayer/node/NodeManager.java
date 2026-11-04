@@ -1,5 +1,6 @@
 package com.chiefminingdad.autoplayer.node;
 
+import com.chiefminingdad.autoplayer.AutoPlayerClient;
 import net.minecraft.core.Vec3i;
 import org.jspecify.annotations.NonNull;
 
@@ -42,7 +43,7 @@ public class NodeManager {
     public void addNode(@NonNull Node newNode) {
         ReferenceTable.put(newNode.location, NodeList.size());
         NodeList.add(newNode);
-//        AutoPlayer.LOGGER.info("{}", newNode);
+        AutoPlayerClient.blockManager.setBlockState(newNode.location);
     }
 
     /**

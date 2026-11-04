@@ -70,12 +70,16 @@ public class PathManager {
      * Runs one round of expanding the path.
      */
     public void run(){
+        if(AutoPlayerClient.blockManager.setAllBlockStates()){
+            updateStartLocation(getPlayer().getOnPos().above());
+        }
+
         setAllWeights();
         Vec3i nextVector = getBestNextNode();
         Node nextNode = nodeManager.getNode(nextVector);
         nextNode.searched = true;
 
-        if (!(nextNode.layer>10||nextVector.equals(endLocation))) {
+        if (!(nextNode.layer>50||nextVector.equals(endLocation))) {
             Vec3i[] duplicateNodes = nodeManager.addSurroundingNodes(nextNode);
             setAllWeights();
             setBetterNodeWeights(duplicateNodes, nextNode);

@@ -11,9 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 
 /**
  * {@link BlockManager} handles all getting and storing of {@link BlockState} data to find the best path.
@@ -21,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BlockManager{
     NodeManager nodeManager;
 
-    Dictionary<Vec3i, BlockState> blockStateDictionary = new Hashtable<>();
+    Hashtable<Vec3i, BlockState> blockStateDictionary = new Hashtable<>();
 
     private Minecraft client;
     private ClientLevel clientLevel;
@@ -46,20 +44,40 @@ public class BlockManager{
 
     }
 
+    private Vec3i[] getVectors(){
+        ArrayList<Vec3i> vectors = new ArrayList<>();
+
+        for(Iterator<Vec3i> e = nodeManager.ReferenceTable.keys().asIterator(); e.hasNext();){
+            Vec3i vector = e.next();
+            for (int i = -1; i <=1 ; i++) {
+                if(!vectors.contains(vector.offset(0,i,0))){
+                    vectors.add(vector);
+                }
+            }
+        }
+        return vectors.toArray(new Vec3i[0]);
+    }
+
     /**
      *
      * @return {@link Boolean} Whether there was a change in value of the block states.
      */
-    public boolean getAllBlockStates(){
-        AtomicBoolean changed = new AtomicBoolean(false);
-        nodeManager.ReferenceTable.keys().asIterator().forEachRemaining(vec3i -> {
-            BlockState previousBlockState = blockStateDictionary.get(vec3i);
-            if(blockStateDictionary.put(vec3i, getBlockState(vec3i))!=null){
-                changed.set(true);
+    public boolean setAllBlockStates(){
+        boolean changed = false;
+        for(Vec3i vector: getVectors()){
+            if(blockStateDictionary.put(vector, getBlockState(vector))!=null){
+                changed = true;
             }
-        });
-        return changed.get();
+        }
+        return changed;
     }
+
+    public void setBlockState(Vec3i vector){
+        if(!blockStateDictionary.containsKey(vector)){
+            blockStateDictionary.put(vector,getBlockState(vector));
+        }
+    }
+
     public BlockState getBlockState(Vec3i location){
         return getBlockState(location, getClientLevel());
     }
