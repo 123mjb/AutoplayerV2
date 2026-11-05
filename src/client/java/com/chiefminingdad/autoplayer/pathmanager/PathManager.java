@@ -53,6 +53,7 @@ public class PathManager {
     public PathManager(Vec3i finalLocation){
         endLocation = finalLocation;
         nodeManager = new NodeManager(new Node(getPlayer().getOnPos().above(),0));
+        AutoPlayerClient.blockManager.setNodeManager(nodeManager);
     }
 
     /**
