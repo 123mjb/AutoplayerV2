@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
@@ -70,11 +71,17 @@ public class BlockManager{
     public boolean setAllBlockStates(){
         boolean changed = false;
         for(Vec3i vector: getVectors()){
-            if(blockStateDictionary.put(vector, getBlockState(vector))!=null){
+            BlockState newBlockState = getBlockState(vector);
+            if(!equals(newBlockState,blockStateDictionary.get(vector))){
                 changed = true;
             }
+            blockStateDictionary.put(vector, newBlockState);
         }
         return changed;
+    }
+
+    public boolean equals(BlockState a, BlockState b){
+        return Block.getId(a) == Block.getId(b);
     }
 
     /**
