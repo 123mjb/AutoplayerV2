@@ -3,16 +3,16 @@ package com.chiefminingdad.autoplayer.graphics;
 import com.chiefminingdad.autoplayer.AutoPlayer;
 import com.chiefminingdad.autoplayer.AutoPlayerClient;
 import com.chiefminingdad.autoplayer.node.Node;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
@@ -49,7 +49,7 @@ public class GraphicsManager implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        AutoPlayer.LOGGER.info("E");
+        AutoPlayer.LOGGER.info("autoplayer Graphics Initialising");
         LevelExtractionEvents.END_EXTRACTION.register(this::ExtractLineLocations);
         LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(this::renderAndDrawLines);
     }
@@ -78,7 +78,7 @@ public class GraphicsManager implements ClientModInitializer {
         assert vertexFormat != null;
 
         PrimitiveTopology primitiveTopology = renderPipeline.getPrimitiveTopology();
-        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.DEBUG_LINES ? RenderSystem.getProjectionType().vertexSorting() : null);
+        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.DEBUG_LINES? RenderSystem.getProjectionType().vertexSorting() : null);
 
         this.renderLines(context,draw);
 
@@ -125,7 +125,7 @@ public class GraphicsManager implements ClientModInitializer {
         try (RenderPass renderPass = RenderSystem.getDevice()
                 .createCommandEncoder()
                 .createRenderPass(()-> AutoPlayer.MOD_ID + " path line rendering.", colorTexture, Optional.empty(), mainTarget.getDepthTextureView(), OptionalDouble.empty() )){
-            renderPass.setPipeline(renderPipeline);
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(renderPipeline));
 
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);

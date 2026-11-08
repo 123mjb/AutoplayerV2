@@ -118,7 +118,7 @@ public class BlockManager{
     public static BlockState getBlockState(Vec3i location, ClientLevel level) throws RuntimeException{
         if(level==null) throw new RuntimeException("Level not initialised.");
 
-        return level.getBlockState(new BlockPos(location));
+        return level.getBlockState(new BlockPos(location.getX(),location.getY(),location.getZ()));
     }
 
     /**
