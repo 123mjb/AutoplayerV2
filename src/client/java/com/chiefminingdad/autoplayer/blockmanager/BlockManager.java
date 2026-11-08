@@ -1,5 +1,6 @@
 package com.chiefminingdad.autoplayer.blockmanager;
 
+import com.chiefminingdad.autoplayer.AutoPlayer;
 import com.chiefminingdad.autoplayer.node.Node;
 import com.chiefminingdad.autoplayer.node.NodeManager;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,6 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
@@ -134,24 +136,51 @@ public class BlockManager{
         blockStateDictionary = new Hashtable<>();
     }
 
+    /**
+     * Returns the estimated amount of time to walk to that node from the previous node.
+     * @param node The node for the estimation.
+     * @return The movement weight.
+     */
     public float getMovementWeight(Node node){
         Vec3i previous = node.previousLocation;
         Vec3i current = node.location;
         float start = getMovementWeight(previous);
         float end = getMovementWeight(current);
-        float distXY = (float) Math.sqrt(
-                Math.pow(previous.getX()-current.getX(),2) +
-                        Math.pow(previous.getY()-current.getY(),2));
-        return start * distXY / 2 + end * distXY / 2;
+        float distXZ = (float) Math.sqrt(
+                Math.pow(previous.getX()-current.getX(),2d) +
+                        Math.pow(previous.getZ()-current.getZ(),2d));
+        return start * distXZ / 2f + miningSpeed(previous) +
+                end * distXZ / 2f + miningSpeed(current);
     }
     private float getMovementWeight(Vec3i loc){
         BlockState head = getBlockState(loc.above());
         BlockState feet = getBlockState(loc);
         BlockState standing = getBlockState(loc.below());
-        return 0; // TODO: Add the Logic to work out the movement weights of a specific block.
+
+        return walkingSpeed(standing);
+        // TODO: make mining speed actually work out mining speed and movement to include affects of other blocks on movement speed.
     }
 
+    private float miningSpeed(Vec3i location){
+        BlockState blockStateHead = getBlockState(location.above());
+        BlockState blockStateFeet = getBlockState(location);
+        return getMiningSpeed(blockStateFeet) + getMiningSpeed(blockStateHead);
+    }
+    private float getMiningSpeed(BlockState blockState){
+        if(!blockState.isAir()) return 5f;
+        return 0f;
+    }
 
+    private float walkingSpeed(BlockState standing){
+        Block block = standing.getBlock();
+        if(block == Blocks.BLUE_ICE) return 1f/4.376f;
+        else if(block == Blocks.ICE||block == Blocks.PACKED_ICE||block == Blocks.FROSTED_ICE) return 1f/4.157f;
+        else if(block == Blocks.SLIME_BLOCK) return 1f/3.040f;
+        else if(block == Blocks.HONEY_BLOCK||block == Blocks.SOUL_SAND) return 1f/2.508f;
+        else if(block == Blocks.WATER|| block == Blocks.LAVA) return 10f;
+        else if(block == Blocks.AIR) return 100f;
+        return 1f/4.317f;
+    }
 
 
     public static class Tests{

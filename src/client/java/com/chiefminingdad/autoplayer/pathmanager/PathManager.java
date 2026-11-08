@@ -1,5 +1,6 @@
 package com.chiefminingdad.autoplayer.pathmanager;
 
+import com.chiefminingdad.autoplayer.AutoPlayer;
 import com.chiefminingdad.autoplayer.AutoPlayerClient;
 import com.chiefminingdad.autoplayer.node.Node;
 import com.chiefminingdad.autoplayer.node.NodeManager;
@@ -43,6 +44,7 @@ public class PathManager {
     public PathManager(Vec3i startingLocation,Vec3i finalLocation){
         nodeManager = new NodeManager(new Node(startingLocation,0));
         AutoPlayerClient.blockManager.setNodeManager(nodeManager);
+        AutoPlayerClient.blockManager.reset();
         endLocation = finalLocation;
     }
 
@@ -54,6 +56,7 @@ public class PathManager {
         endLocation = finalLocation;
         nodeManager = new NodeManager(new Node(getPlayer().getOnPos().above(),0));
         AutoPlayerClient.blockManager.setNodeManager(nodeManager);
+        AutoPlayerClient.blockManager.reset();
     }
 
     /**
@@ -86,6 +89,7 @@ public class PathManager {
             setBetterNodeWeights(duplicateNodes, nextNode);
         }else {
             traceBackPath(nextNode);
+            AutoPlayer.LOGGER.info(nextNode.toString());
         }
     }
 
@@ -116,8 +120,8 @@ public class PathManager {
             Node storedNode = nodeManager.getNode(vector);
             Node newNode = new Node(vector,previousNode.location,previousNode.layer+1);
             double newNodeWeight = generateWeightValue(newNode);
-            if(newNodeWeight < storedNode.weight){
-                newNode.weight = newNodeWeight;
+            if(newNodeWeight < storedNode.getWeight()){
+                newNode.setWeight(newNodeWeight);
                 nodeManager.setNode(vector,newNode);
             }
         }
@@ -128,13 +132,13 @@ public class PathManager {
      */
     private Vec3i getBestNextNode(){
         Node bestNode = new Node(new Vec3i(0,0,0));
-        bestNode.weight = Double.MAX_VALUE;
+        bestNode.setWeight(Double.MAX_VALUE);
         double bestWeight = Double.MAX_VALUE;
 
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
             Node current = nodeManager.getNode(i);
-            double currentWeight = current.weight + NodeManager.getDistanceWeight(current.location,endLocation);
-            if(!current.searched && current.weight>=0 && currentWeight< bestWeight){
+            double currentWeight = current.getWeight() + NodeManager.getDistanceWeight(current.location,endLocation);
+            if(!current.searched && current.getWeight()>=0 && currentWeight< bestWeight){
                 bestNode = current;
                 bestWeight = currentWeight;
             }
@@ -147,7 +151,7 @@ public class PathManager {
      */
     private void setAllWeights(){
         for (int i = 0; i < nodeManager.NodeList.toArray().length; i++) {
-            if(nodeManager.getNode(i).weight<0) {
+            if(nodeManager.getNode(i).getWeight()<0) {
                 setWeight(i);
             }
         }
@@ -158,14 +162,15 @@ public class PathManager {
      * @param index The index of the node in {@link NodeManager#NodeList}
      */
     private void setWeight(int index){
-        Node node = nodeManager.NodeList.get(index);
-        if(node.previousLocation ==null){
-            node.weight = 0;
+        Node node = nodeManager.getNode(index);
+        if(node.previousLocation == null){
+            node.setWeight(0);
         }
         else {
             Node previousNode = nodeManager.getNode(node.previousLocation);
-            node.weight = generateWeightValue(node, previousNode);
+            node.setWeight(generateWeightValue(node, previousNode));
         }
+//        AutoPlayer.LOGGER.info("{} {}", node, nodeManager.getNode(index));
     }
 
     /**
@@ -175,17 +180,18 @@ public class PathManager {
      * @return The weight of the current Node
      */
     private double generateWeightValue(Node currentNode, Node previousNode){
-        return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
+        if (currentNode.previousLocation==null||previousNode == null) {return 0;}
+        return AutoPlayerClient.blockManager.getMovementWeight(currentNode) + previousNode.getWeight();
     }
 
     /**
-     * At the moment a primitive implementation to check that the rest of the systems work first.
+     * Better implementation still needs more features updated.
      * @param currentNode The node to get the Weight of.
      * @return The weight of the current Node
      */
     private double generateWeightValue(Node currentNode){
         Node previousNode = nodeManager.getNode(currentNode.previousLocation);
-        if (currentNode.previousLocation==null) return 0;
-        return Math.sqrt(currentNode.location.distSqr(previousNode.location)) + previousNode.weight;
+        if (currentNode.previousLocation==null) {return 0;}
+        return AutoPlayerClient.blockManager.getMovementWeight(currentNode) + previousNode.getWeight();
     }
 }

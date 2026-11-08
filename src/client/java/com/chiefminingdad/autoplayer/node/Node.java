@@ -11,8 +11,26 @@ public class Node {
     public Vec3i previousLocation = null;
     public int layer = -1;
     public boolean searched = false;
+    private double weight = -1;
 
-    public double weight = -1;
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    public boolean isSearched() {
+        return searched;
+    }
+
+    public void setSearched(boolean searched) {
+        this.searched = searched;
+    }
+
+
+
 
     /**
      * Should not be used as does not have the important information for Nodes to be used.

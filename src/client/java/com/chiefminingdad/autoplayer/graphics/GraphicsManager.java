@@ -109,8 +109,8 @@ public class GraphicsManager implements ClientModInitializer {
     }
 
     private void renderLine(Matrix4fc positionMatrix, VertexConsumer buffer, Line line){
-        buffer.addVertex(positionMatrix, (float) line.startX, (float) line.startY, (float) line.startZ).setColor(0f,1f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
-        buffer.addVertex(positionMatrix, (float) line.endX, (float) line.endY, (float) line.endZ).setColor(0f,1f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
+        buffer.addVertex(positionMatrix, (float) line.startX, (float) line.startY, (float) line.startZ).setColor(1f,0f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
+        buffer.addVertex(positionMatrix, (float) line.endX, (float) line.endY, (float) line.endZ).setColor(1f,0f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
     }
 
     public static void draw(Minecraft client, StagedVertexBuffer.ExecuteInfo info, RenderPipeline renderPipeline){
