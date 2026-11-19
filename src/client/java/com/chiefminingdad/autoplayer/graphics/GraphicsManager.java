@@ -6,19 +6,13 @@ import com.chiefminingdad.autoplayer.node.Node;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.renderpearl.api.commands.RenderPass;
-import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.*;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.StagedVertexBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -29,9 +23,10 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Optional;
-import java.util.OptionalDouble;
 
 public class GraphicsManager implements ClientModInitializer {
+
+    private static GraphicsManager instance;
 
     private static final RenderPipeline LINE_THROUGH_WALLS = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(AutoPlayer.id("pipeline/line_through_walls"))
@@ -45,13 +40,20 @@ public class GraphicsManager implements ClientModInitializer {
     private static final Vector3f MODEL_OFFSET = new Vector3f();
     private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();
     private static final StagedVertexBuffer stagedBuffer = new StagedVertexBuffer(() -> "Lines Buffer", RenderType.SMALL_BUFFER_SIZE);
+    private StagedVertexBuffer.Draw draw;
 
+    public static GraphicsManager getInstance() {
+        return instance;
+    }
 
     @Override
     public void onInitializeClient() {
+        instance = this;
         AutoPlayer.LOGGER.info("autoplayer Graphics Initialising");
         LevelExtractionEvents.END_EXTRACTION.register(this::ExtractLineLocations);
-        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(this::renderAndDrawLines);
+        LevelRenderEvents.BEFORE_RENDER_PASS.register(this::prepare);
+        LevelRenderEvents.END_MAIN.register(_ -> stagedBuffer.endFrame());
+//        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(this::renderAndDrawLines);
     }
 
     /**
@@ -71,41 +73,35 @@ public class GraphicsManager implements ClientModInitializer {
         }
     }
 
-    private void renderAndDrawLines(LevelRenderContext context){
-        RenderPipeline renderPipeline = GraphicsManager.LINE_THROUGH_WALLS; //GraphicsManager.CONNECTED_LINE;
-        VertexFormat vertexFormat = renderPipeline.getVertexFormatBinding(0);
+    private void prepare(LevelTerrainRenderContext context) {
+        RenderPipeline renderPipeline = GraphicsManager.LINE_THROUGH_WALLS;
+        VertexFormat formatBinding = renderPipeline.getVertexFormatBinding(0);
 
-        assert vertexFormat != null;
+        assert formatBinding != null;
 
-        PrimitiveTopology primitiveTopology = renderPipeline.getPrimitiveTopology();
-        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.DEBUG_LINES? RenderSystem.getProjectionType().vertexSorting() : null);
+        PrimitiveTopology primitive = renderPipeline.getPrimitiveTopology();
+        StagedVertexBuffer.Draw draw = stagedBuffer.appendDraw(formatBinding, primitive, primitive == PrimitiveTopology.DEBUG_LINES ? RenderSystem.getProjectionType().vertexSorting() : null);
 
-        this.renderLines(context,draw);
+        this.renderLines(context, draw);
 
         stagedBuffer.upload();
 
-        StagedVertexBuffer.ExecuteInfo info = stagedBuffer.getExecuteInfo(draw);
-
-        if(info!=null){
-            draw(Minecraft.getInstance(),info, renderPipeline);
-        }
-
-        stagedBuffer.endFrame();
+        this.draw = draw;
     }
 
-    private void renderLines(LevelRenderContext levelRenderContext, StagedVertexBuffer.Draw draw){
-        PoseStack matrices = levelRenderContext.poseStack();
+    private void renderLines(LevelTerrainRenderContext levelRenderContext, StagedVertexBuffer.Draw draw){
+        Matrix4f matrix = new Matrix4f();
         Vec3 camera = levelRenderContext.levelState().cameraRenderState.pos;
 
-        matrices.pushPose();
-        matrices.translate(-camera.x,-camera.y,-camera.z);
+        matrix.translate((float) -camera.x, (float) -camera.y, (float) -camera.z);
 
         final VertexConsumer builder = stagedBuffer.getVertexBuilder(draw);
         if(Lines==null) return;
+        int i = 0;
         for(Line line: Lines) {
-            this.renderLine(matrices.last().pose(), builder,line);
+            AutoPlayer.LOGGER.info(String.valueOf(i++));
+            this.renderLine(matrix, builder,line);
         }
-        matrices.popPose();
     }
 
     private void renderLine(Matrix4fc positionMatrix, VertexConsumer buffer, Line line){
@@ -113,28 +109,31 @@ public class GraphicsManager implements ClientModInitializer {
         buffer.addVertex(positionMatrix, (float) line.endX, (float) line.endY, (float) line.endZ).setColor(1f,0f,0f,0.5f).setNormal(0,1,0).setLineWidth(1f);
     }
 
-    public static void draw(Minecraft client, StagedVertexBuffer.ExecuteInfo info, RenderPipeline renderPipeline){
+    public void draw(RenderPass renderPass){
+        if (this.draw == null) {
+            return;
+        }
+
+        StagedVertexBuffer.ExecuteInfo info = stagedBuffer.getExecuteInfo(this.draw);
+
+        if (info == null) {
+            return;
+        }
+
         GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
                 .writeTransform(RenderSystem.getModelViewMatrixCopy(), COLOR_MODULATOR, MODEL_OFFSET, TEXTURE_MATRIX);
 
-        RenderTarget mainTarget = client.gameRenderer.mainRenderTarget();
-        GpuTextureView colorTexture = mainTarget.getColorTextureView();
+        renderPass.pushDebugGroup(() -> "Fabric Docs Example Pipeline Rendering");
+        renderPass.setPipeline(RenderSystem.getCompiledPipeline(LINE_THROUGH_WALLS));
 
-        assert colorTexture != null;
+        RenderSystem.bindDefaultUniforms(renderPass);
+        renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 
-        try (RenderPass renderPass = RenderSystem.getDevice()
-                .createCommandEncoder()
-                .createRenderPass(()-> AutoPlayer.MOD_ID + " path line rendering.", colorTexture, Optional.empty(), mainTarget.getDepthTextureView(), OptionalDouble.empty() )){
-            renderPass.setPipeline(RenderSystem.getCompiledPipeline(renderPipeline));
+        renderPass.setVertexBuffer(0, info.vertexBuffer().slice());
+        renderPass.setIndexBuffer(info.indexBuffer(), info.indexType());
 
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-
-            renderPass.setVertexBuffer(0, info.vertexBuffer().slice());
-            renderPass.setIndexBuffer(info.indexBuffer(), info.indexType());
-
-            renderPass.drawIndexed(info.indexCount(), 1, info.firstIndex(), info.baseVertex(), 0);
-        }
+        renderPass.drawIndexed(info.indexCount(), 1, info.firstIndex(), info.baseVertex(), 0);
+        renderPass.popDebugGroup();
     }
 
     public static void close() {
